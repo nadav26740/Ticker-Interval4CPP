@@ -3,8 +3,8 @@
 #define TICKER_HPP
 #include <iostream>
 #include <vector>
-#include <time>
-#include <threads>
+#include <ctime>
+#include <thread>
 
 class Ticker
 {
