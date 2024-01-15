@@ -5,6 +5,11 @@
 #include <vector>
 #include <ctime>
 #include <thread>
+#include <cmath>
+#include <memory>
+#include <vector>
+#include <queue>
+#include <mutex>
 
 class Ticker
 {
@@ -14,16 +19,31 @@ private:
     bool m_Force_Stop_Flag = false;
     
     /// @brief the minimum time between ticks
-    time_t m_minimum_time_per_tick = 0.1;
-    
+    std::time_t m_minimum_time_per_tick = 0.1;
+        
     /// @brief The time past since the last tick started
-    time_t m_delta_time = 0;
+    std::time_t m_delta_time = 0;  
+    // TODO: move to high resolution clock Using chrono
 
     /// @brief Clock is the main thread here it will run on the queue of items
-    std::thread m_clock;
+    std::unique_ptr<std::thread> m_clock;
+
+    // List of function to run in every tick
+    std::vector<void(*)(void)> m_functions_list;
+    std::mutex m_function_list_mutex;
+
+    /// @brief That's the main clock thread!
+    void Clock();
 
 public:
+    /// @brief default construtctor that will create a clock without a minimal time per tick 
     Ticker();
+
+    /// @brief Constructor that will create the object with minimal time per tick 
+    /// @param t_minimal_time_per_tick paramater that will hold the time minimal times between ticks
+    Ticker(std::time_t t_minimal_time_per_tick);
+
+    // destructor will crush the clock thread
     ~Ticker();
 
     // ==== Timeline Methoods ====
@@ -52,9 +72,17 @@ public:
     /// @warning If function hasn't found throw exception
     /// @version Unstable
     void RemoveFunction(const void (*t_func)(std::time_t));
+    
+    /// @brief Removing function using his index the list
+    /// @param index index of element to remove
     void RemoveFunction(const int index);
 
-    virtual time_t GetMinimumTimePerTick() const;
+    /// @brief Returning the minimal time between ticks
+    /// @return std::time_t type that represent the minimal time between ticks 
+    virtual std::time_t GetMinimumTimePerTick() const;
+    
+    /// @brief Returning if Clock Still running
+    /// @return Bool type that represent the status of the clock
     virtual bool GetTickerStatus() const;
 };
 #endif
