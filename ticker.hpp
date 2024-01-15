@@ -1,4 +1,5 @@
 #pragma once
+
 #ifndef TICKER_HPP
 #define TICKER_HPP
 #include <iostream>
@@ -10,6 +11,9 @@
 #include <vector>
 #include <queue>
 #include <mutex>
+#include <chrono>
+
+#define DEFAULT_TIME_TYPE_TICKER std::time_t
 
 class Ticker
 {
@@ -19,17 +23,17 @@ private:
     bool m_Force_Stop_Flag = false;
     
     /// @brief the minimum time between ticks
-    std::time_t m_minimum_time_per_tick = 0.1;
+    DEFAULT_TIME_TYPE_TICKER m_minimum_time_per_tick = 1;
         
     /// @brief The time past since the last tick started
-    std::time_t m_delta_time = 0;  
+    DEFAULT_TIME_TYPE_TICKER m_delta_time = 0;
     // TODO: move to high resolution clock Using chrono
 
     /// @brief Clock is the main thread here it will run on the queue of items
     std::unique_ptr<std::thread> m_clock;
 
     // List of function to run in every tick
-    std::vector<void(*)(void)> m_functions_list;
+    std::vector<void(*)(DEFAULT_TIME_TYPE_TICKER)> m_functions_list;
     std::mutex m_function_list_mutex;
 
     /// @brief That's the main clock thread!
@@ -65,13 +69,13 @@ public:
     /// @param func Function pointer to the new function
     /// @attention function need to be in this standart: void <function name>(time_t deltatime)
     ///  Where "deltatime" is the time gap from last running
-    void AddFunction(const void (*t_func)(std::time_t));
+    void AddFunction(void (*t_func)(DEFAULT_TIME_TYPE_TICKER));
     
     /// @brief Will search for function with the same ptr in the list and try to remove it
     /// @param t_func Function to search
     /// @warning If function hasn't found throw exception
     /// @version Unstable
-    void RemoveFunction(const void (*t_func)(std::time_t));
+    void RemoveFunction(void (*t_func)(DEFAULT_TIME_TYPE_TICKER));
     
     /// @brief Removing function using his index the list
     /// @param index index of element to remove
@@ -79,10 +83,10 @@ public:
 
     /// @brief Returning the minimal time between ticks
     /// @return std::time_t type that represent the minimal time between ticks 
-    virtual std::time_t GetMinimumTimePerTick() const;
+    virtual DEFAULT_TIME_TYPE_TICKER GetMinimumTimePerTick() const noexcept;
     
     /// @brief Returning if Clock Still running
     /// @return Bool type that represent the status of the clock
-    virtual bool GetTickerStatus() const;
+    virtual bool GetTickerStatus() const noexcept;
 };
 #endif
