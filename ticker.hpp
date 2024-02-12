@@ -18,18 +18,26 @@
 
 class Ticker
 {
-private:
+protected:
     /// @brief For timeline control so we will be able to stop and start the methood
     bool m_Running = false;
     bool m_Force_Stop_Flag = false;
-    
+
     /// @brief the minimum time between ticks
-    DEFAULT_TIME_TYPE_TICKER m_minimum_time_per_tick = std::chrono::milliseconds(2);
-        
+    DEFAULT_TIME_TYPE_TICKER interval = std::chrono::milliseconds(2);
+
     /// @brief The time past since the last tick started
     DEFAULT_TIME_TYPE_TICKER m_delta_time = std::chrono::milliseconds(0);
+    
     // TODO: move to high resolution clock Using chrono
+    
+    /// @brief That's the main clock thread!
+    virtual void Clock();
 
+private:
+    
+    
+    
     /// @brief Clock is the main thread here it will run on the queue of items
     std::unique_ptr<std::thread> m_clock;
 
@@ -37,8 +45,6 @@ private:
     std::vector<void(*)(DEFAULT_TIME_TYPE_TICKER)> m_functions_list;
     std::mutex m_function_list_mutex;
 
-    /// @brief That's the main clock thread!
-    void Clock();
 
 public:
     /// @brief default construtctor that will create a clock without a minimal time per tick 
@@ -51,18 +57,18 @@ public:
     // destructor will crush the clock thread
     ~Ticker();
 
-    // ==== Timeline Methoods ====
-    
+    // ======== Timeline Methoods ========
+
     /// @brief will make the current ticker rotation his last
-    void Stop();
+    virtual void Stop();
 
     /// @brief Will start the ticker thread
-    void Start();
+    virtual void Start();
 
     /// @brief Will make the ticker to stop immidetily buy crashing the thread (Not recommanded!)
-    void ForceStop();
+    virtual void ForceStop();
 
-    // =========================
+    // ===================================
 
     // ==== control list methoods ====
 
@@ -84,12 +90,12 @@ public:
 
     /// @brief Returning the minimal time between ticks
     /// @return std::time_t type that represent the minimal time between ticks 
-    virtual DEFAULT_TIME_TYPE_TICKER GetMinimumTimePerTick() const noexcept;
+    virtual DEFAULT_TIME_TYPE_TICKER GetInterval() const noexcept;
     
     /// @brief Returning if Clock Still running
     /// @return Bool type that represent the status of the clock
     virtual bool GetTickerStatus() const noexcept;
 
-    void SetMinimumTimeBetweenTicks(DEFAULT_TIME_TYPE_TICKER time_per_tick) noexcept;
+    void SetInterval(DEFAULT_TIME_TYPE_TICKER time_per_tick) noexcept;
 };
 #endif
