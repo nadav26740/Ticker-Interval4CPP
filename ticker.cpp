@@ -36,8 +36,8 @@ void Ticker::ForceStop()
     std::thread *clock = m_clock.release();
     m_Running = false;
     m_Force_Stop_Flag = false;
-    if(clock->joinable())
-        clock->join()
+    if (clock->joinable())
+        clock->join();
     delete clock;
 }
 
