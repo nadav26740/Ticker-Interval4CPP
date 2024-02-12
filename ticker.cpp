@@ -8,13 +8,19 @@ Ticker::Ticker()
     } 
 }
 
-Ticker::Ticker(std::time_t t_minimal_time_per_tick)
+Ticker::Ticker(DEFAULT_TIME_TYPE_TICKER t_minimal_time_per_tick)
 {
     m_minimum_time_per_tick = t_minimal_time_per_tick;
 }
 
 Ticker::~Ticker()
 {
+    m_Running = false;
+    m_Force_Stop_Flag = true;
+    if (m_clock->joinable())
+    {
+        m_clock->join();
+    }
 }
 
 void Ticker::Stop()
@@ -43,13 +49,20 @@ void Ticker::Clock()
     // TODO: move to high resoulation clock
 
     std::queue<void(*)(DEFAULT_TIME_TYPE_TICKER)> funclist;
-    std::chrono::system_clock::time_point t_point = std::chrono::system_clock::now();
+    std::chrono::high_resolution_clock::time_point t_point = std::chrono::high_resolution_clock::now();
+    DEFAULT_TIME_TYPE_TICKER delay_timer;
 
     while (m_Running && !m_Force_Stop_Flag)
     {
-        m_delta_time = std::time(nullptr) - std::chrono::system_clock::to_time_t(t_point);
+        m_delta_time = std::chrono::duration_cast<DEFAULT_TIME_TYPE_TICKER>(std::chrono::high_resolution_clock::now() - t_point);
+        t_point = std::chrono::high_resolution_clock::now();
         // getting all the function ptrs into the list
-        m_function_list_mutex.lock();
+        while (m_function_list_mutex.try_lock())
+        {
+            // checking if force stop flag is up
+            if (m_Force_Stop_Flag)
+                return;
+        }
         for (auto func_ptr : m_functions_list)
         {
             funclist.push(func_ptr);
@@ -58,11 +71,17 @@ void Ticker::Clock()
 
         while (!funclist.empty() && !m_Force_Stop_Flag)
         {
+            // checking for force stop flag
+            if (m_Force_Stop_Flag)
+                return;
+
             funclist.back()(m_delta_time);
             funclist.pop();
         }
-    
-
+        delay_timer = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - t_point);
+            std::this_thread::sleep_for(m_minimum_time_per_tick - delay_timer > DEFAULT_TIME_TYPE_TICKER(0) ? // if it didn't took to long have delay 
+                (m_minimum_time_per_tick - delay_timer) : 
+                DEFAULT_TIME_TYPE_TICKER(0)); // else
     }
     
 }
@@ -114,4 +133,9 @@ DEFAULT_TIME_TYPE_TICKER Ticker::GetMinimumTimePerTick() const noexcept
 bool Ticker::GetTickerStatus() const noexcept
 {
     return m_Running;
+}
+
+void Ticker::SetMinimumTimeBetweenTicks(DEFAULT_TIME_TYPE_TICKER time_per_tick) noexcept
+{
+    this->m_minimum_time_per_tick = time_per_tick;
 }

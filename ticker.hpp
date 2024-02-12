@@ -13,7 +13,8 @@
 #include <mutex>
 #include <chrono>
 
-#define DEFAULT_TIME_TYPE_TICKER std::time_t
+
+#define DEFAULT_TIME_TYPE_TICKER std::chrono::milliseconds
 
 class Ticker
 {
@@ -23,10 +24,10 @@ private:
     bool m_Force_Stop_Flag = false;
     
     /// @brief the minimum time between ticks
-    DEFAULT_TIME_TYPE_TICKER m_minimum_time_per_tick = 1;
+    DEFAULT_TIME_TYPE_TICKER m_minimum_time_per_tick = std::chrono::milliseconds(2);
         
     /// @brief The time past since the last tick started
-    DEFAULT_TIME_TYPE_TICKER m_delta_time = 0;
+    DEFAULT_TIME_TYPE_TICKER m_delta_time = std::chrono::milliseconds(0);
     // TODO: move to high resolution clock Using chrono
 
     /// @brief Clock is the main thread here it will run on the queue of items
@@ -45,7 +46,7 @@ public:
 
     /// @brief Constructor that will create the object with minimal time per tick 
     /// @param t_minimal_time_per_tick paramater that will hold the time minimal times between ticks
-    Ticker(std::time_t t_minimal_time_per_tick);
+    Ticker(DEFAULT_TIME_TYPE_TICKER t_minimal_time_per_tick);
 
     // destructor will crush the clock thread
     ~Ticker();
@@ -88,5 +89,7 @@ public:
     /// @brief Returning if Clock Still running
     /// @return Bool type that represent the status of the clock
     virtual bool GetTickerStatus() const noexcept;
+
+    void SetMinimumTimeBetweenTicks(DEFAULT_TIME_TYPE_TICKER time_per_tick) noexcept;
 };
 #endif
