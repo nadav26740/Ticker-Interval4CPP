@@ -16,7 +16,7 @@
 // if u want to change the time scale change it here!
 #define DEFAULT_TIME_TYPE_TICKER std::chrono::milliseconds
 
-namespace NadavWorkshop
+namespace Retsamgram
 {
     class Ticker
     {
@@ -31,28 +31,22 @@ namespace NadavWorkshop
         /// @brief The time past since the last tick started
         DEFAULT_TIME_TYPE_TICKER m_delta_time = DEFAULT_TIME_TYPE_TICKER(0);
 
-        // TODO: move to high resolution clock Using chrono
-
         /// @brief That's the main clock thread!
         virtual void Clock();
 
     private:
-
-
-
         /// @brief Clock is the main thread here it will run on the queue of items
         std::unique_ptr<std::thread> m_clock;
 
         // List of function to run in every tick
-        std::vector<void(*)(DEFAULT_TIME_TYPE_TICKER)> m_functions_list;
+        std::vector<void (*)(DEFAULT_TIME_TYPE_TICKER)> m_functions_list;
         std::mutex m_function_list_mutex;
 
-
     public:
-        /// @brief default construtctor that will create a clock without a minimal time per tick 
+        /// @brief default construtctor that will create a clock without a minimal time per tick
         Ticker();
 
-        /// @brief Constructor that will create the object with minimal time per tick 
+        /// @brief Constructor that will create the object with minimal time per tick
         /// @param t_minimal_time_per_tick paramater that will hold the time minimal times between ticks
         Ticker(DEFAULT_TIME_TYPE_TICKER t_minimal_time_per_tick);
 
@@ -77,7 +71,7 @@ namespace NadavWorkshop
         /// @brief Adding new function to the function queue
         /// @param func Function pointer to the new function
         /// @attention function need to be in this standart: void <function name>(time_t deltatime)
-        ///  Where "deltatime" is the time gap from last running
+        /// ? Where "deltatime" is the time gap from last running
         void AddFunction(void (*t_func)(DEFAULT_TIME_TYPE_TICKER));
 
         /// @brief Will search for function with the same ptr in the list and try to remove it
@@ -91,7 +85,7 @@ namespace NadavWorkshop
         void RemoveFunction(const int index);
 
         /// @brief Returning the minimal time between ticks
-        /// @return std::time_t type that represent the minimal time between ticks 
+        /// @return std::time_t type that represent the minimal time between ticks
         virtual DEFAULT_TIME_TYPE_TICKER GetInterval() const noexcept;
 
         /// @brief Returning if Clock Still running
