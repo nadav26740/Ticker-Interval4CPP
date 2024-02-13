@@ -75,7 +75,7 @@ void Ticker::Clock()
         }
 
         // getting the amount of time that has passed since the loop started
-        delay_timer = std::chrono::duration_cast<std::chrono::milliseconds>(std::chrono::high_resolution_clock::now() - t_point);
+        delay_timer = std::chrono::duration_cast<DEFAULT_TIME_TYPE_TICKER>(std::chrono::high_resolution_clock::now() - t_point);
         if (delay_timer > interval)
         {
             m_delta_time = delay_timer;
