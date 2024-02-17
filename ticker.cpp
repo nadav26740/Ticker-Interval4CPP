@@ -70,6 +70,9 @@ void Ticker::Clock()
             if (m_Force_Stop_Flag)
                 return;
 
+
+            // TODO: NEED TO BE OPTIMIZED CHANGE FUNCLIST WAY
+            // LIST TAKING TOO MUCH ON POOP
             funclist.back()(m_delta_time);
             funclist.pop();
         }
@@ -105,7 +108,6 @@ void Ticker::RemoveFunction(void(*t_func)(DEFAULT_TIME_TYPE_TICKER))
         if (*func_vec_itr == t_func)
         {
             m_functions_list.erase(func_vec_itr);
-            m_function_list_mutex.unlock();
         }
     }
     m_function_list_mutex.unlock();
