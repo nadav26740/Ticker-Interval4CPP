@@ -50,7 +50,7 @@ void Ticker::Clock()
     while (m_Running && !m_Force_Stop_Flag)
     {
         // m_delta_time = std::chrono::duration_cast<DEFAULT_TIME_TYPE_TICKER>(std::chrono::high_resolution_clock::now() - t_point);
-        t_point = std::chrono::high_resolution_clock::now();
+        t_point = std::chrono::high_resolution_clock::now() + interval;
         // getting all the function ptrs into the list
         while (m_function_list_mutex.try_lock())
         {
@@ -70,21 +70,15 @@ void Ticker::Clock()
             if (m_Force_Stop_Flag)
                 return;
 
+
+            // TODO: NEED TO BE OPTIMIZED CHANGE FUNCLIST WAY
+            // LIST TAKING TOO MUCH ON POOP
             funclist.back()(m_delta_time);
             funclist.pop();
         }
 
         // getting the amount of time that has passed since the loop started
-        delay_timer = std::chrono::duration_cast<DEFAULT_TIME_TYPE_TICKER>(std::chrono::high_resolution_clock::now() - t_point);
-        if (delay_timer > interval)
-        {
-            m_delta_time = delay_timer;
-        }
-        else
-        {
-            m_delta_time = interval;
-            std::this_thread::sleep_for(interval - delay_timer);
-        }
+        std::this_thread::sleep_until(t_point);
     }
     
 }
@@ -105,7 +99,6 @@ void Ticker::RemoveFunction(void(*t_func)(DEFAULT_TIME_TYPE_TICKER))
         if (*func_vec_itr == t_func)
         {
             m_functions_list.erase(func_vec_itr);
-            m_function_list_mutex.unlock();
         }
     }
     m_function_list_mutex.unlock();
