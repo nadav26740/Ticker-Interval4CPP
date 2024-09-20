@@ -43,16 +43,15 @@ void Ticker::ForceStop()
 
 void Ticker::Clock()
 {
-    std::queue<void(*)(DEFAULT_TIME_TYPE_TICKER)> funclist;
-    std::chrono::high_resolution_clock::time_point t_point = std::chrono::high_resolution_clock::now();
+    std::chrono::steady_clock::time_point t_point;
     DEFAULT_TIME_TYPE_TICKER delay_timer;
 
     while (m_Running && !m_Force_Stop_Flag)
     {
         // m_delta_time = std::chrono::duration_cast<DEFAULT_TIME_TYPE_TICKER>(std::chrono::high_resolution_clock::now() - t_point);
-        t_point = std::chrono::high_resolution_clock::now() + interval;
+        t_point = std::chrono::steady_clock::now() + interval;
         // getting all the function ptrs into the list
-        while (m_function_list_mutex.try_lock())
+        while (!m_function_list_mutex.try_lock())
         {
             // checking if force stop flag is up
             if (m_Force_Stop_Flag)
@@ -60,22 +59,9 @@ void Ticker::Clock()
         }
         for (auto func_ptr : m_functions_list)
         {
-            funclist.push(func_ptr);
+            func_ptr(m_delta_time);
         }
         m_function_list_mutex.unlock();
-
-        while (!funclist.empty() && !m_Force_Stop_Flag)
-        {
-            // checking for force stop flag
-            if (m_Force_Stop_Flag)
-                return;
-
-
-            // TODO: NEED TO BE OPTIMIZED CHANGE FUNCLIST WAY
-            // LIST TAKING TOO MUCH ON POOP
-            funclist.back()(m_delta_time);
-            funclist.pop();
-        }
 
         // getting the amount of time that has passed since the loop started
         std::this_thread::sleep_until(t_point);
