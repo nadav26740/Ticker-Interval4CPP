@@ -4,12 +4,8 @@
 #define TICKER_HPP
 #include <iostream>
 #include <vector>
-#include <ctime>
 #include <thread>
-#include <cmath>
 #include <memory>
-#include <vector>
-#include <queue>
 #include <mutex>
 #include <chrono>
 
