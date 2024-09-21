@@ -2,10 +2,10 @@
 
 Ticker::Ticker()
 {
-    if(std::thread::hardware_concurrency() <= 0)
+    if (std::thread::hardware_concurrency() <= 0)
     {
         std::cerr << "Warning: Concurrent threads supported is 0 or lower" << std::endl;
-    } 
+    }
 }
 
 Ticker::Ticker(DEFAULT_TIME_TYPE_TICKER t_minimal_time_per_tick)
@@ -21,7 +21,7 @@ Ticker::~Ticker()
 void Ticker::Stop()
 {
     m_Running = false;
-    if(m_clock->joinable())
+    if (m_clock->joinable())
         m_clock->join();
 }
 
@@ -36,8 +36,10 @@ void Ticker::ForceStop()
     std::thread *clock = m_clock.release();
     m_Running = false;
     m_Force_Stop_Flag = false;
+
     if (clock->joinable())
         clock->join();
+
     delete clock;
 }
 
@@ -49,7 +51,7 @@ void Ticker::Clock()
     while (m_Running && !m_Force_Stop_Flag)
     {
         // m_delta_time = std::chrono::duration_cast<DEFAULT_TIME_TYPE_TICKER>(std::chrono::high_resolution_clock::now() - t_point);
-        t_point = std::chrono::steady_clock::now() + interval;
+        t_point = interval + std::chrono::steady_clock::now();
         // getting all the function ptrs into the list
         while (!m_function_list_mutex.try_lock())
         {
@@ -66,17 +68,16 @@ void Ticker::Clock()
         // getting the amount of time that has passed since the loop started
         std::this_thread::sleep_until(t_point);
     }
-    
 }
 
-void Ticker::AddFunction(void(*t_func)(DEFAULT_TIME_TYPE_TICKER))
+void Ticker::AddFunction(void (*t_func)(DEFAULT_TIME_TYPE_TICKER))
 {
     m_function_list_mutex.lock();
     m_functions_list.push_back(t_func);
     m_function_list_mutex.unlock();
 }
 
-void Ticker::RemoveFunction(void(*t_func)(DEFAULT_TIME_TYPE_TICKER))
+void Ticker::RemoveFunction(void (*t_func)(DEFAULT_TIME_TYPE_TICKER))
 {
     std::vector<void (*)(DEFAULT_TIME_TYPE_TICKER)>::iterator func_vec_itr = m_functions_list.begin();
     m_function_list_mutex.lock();
