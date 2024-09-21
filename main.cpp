@@ -1,6 +1,6 @@
 #include <iostream>
 #include <chrono>
-#include "ticker.hpp"
+#include "InOneFile/ticker.hpp"
 
 
 void ticker_tester(DEFAULT_TIME_TYPE_TICKER delta_time);
@@ -9,8 +9,8 @@ void ticker_tester(DEFAULT_TIME_TYPE_TICKER delta_time);
 
 int main(int argn, char** argv)
 {
-	Ticker* clocka = new Ticker();
-	clocka->SetInterval(std::chrono::milliseconds(150));
+	Resta::Ticker* clocka = new Resta::Ticker();
+	clocka->SetInterval(std::chrono::milliseconds(160));
 	clocka->AddFunction(&ticker_tester);
 	
 	clocka->Start();
