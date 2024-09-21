@@ -8,6 +8,9 @@ in the future it will be moved into one file with namespace!
 
 ## Usage
 ```cpp
+    // If you using the allinone file
+    using namespace Resta;
+
     Ticker* clocka = new Ticker(); // Creating object
     clocka->SetInterval(std::chrono::milliseconds(100)); // setting the interval 
 	clocka->AddFunction(&ticker_tester);    // Adding the function to the queue to run in loop
