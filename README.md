@@ -40,6 +40,9 @@ void [Function_name]](DEFAULT_TIME_TYPE_TICKER delta_time)
 
 ### Example
 ```cpp
+    // If you using the allinone file
+    using namespace Resta;
+
     // creating new ticker object
     Ticker* clocka = new Ticker();
 
