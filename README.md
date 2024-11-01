@@ -1,6 +1,6 @@
 # CPP TICKER
 cpp ticker is a library that has been written in C++ that made to make threading 
-loops that will take less resource by running with delay between loops
+loops that will take less resource by running with delay between loops just like timer interval in c#
 
 ## How to add to project
 Currently only way to add it to project is adding the "ticker.hpp" and "ticker.cpp" files
